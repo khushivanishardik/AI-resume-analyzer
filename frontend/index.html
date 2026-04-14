@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume Analyzer</title>
+    <style>
+       body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #0f172a;
+    color: white;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    min-height: 100vh;   /* full screen height */
+}
+
+/* Main container */
+.box {
+    background: #1e293b;
+    padding: 20px;
+    border-radius: 12px;
+
+    width: 90%;
+    max-width: 500px;
+
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+/* Title */
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Inputs */
+input, button {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 6px;
+    border: none;
+    box-sizing: border-box;
+}
+
+/* Button */
+button {
+    background: #38bdf8;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* Result area */
+#result {
+    margin-top: 15px;
+
+    max-height: 300px;
+    overflow-y: auto;
+
+    padding-right: 5px;
+}
+
+/* Cards */
+.result-card {
+    background: #111;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 8px;
+
+    word-wrap: break-word;
+}
+
+/* 📱 MOBILE OPTIMIZATION */
+@media (max-width: 600px) {
+
+    .box {
+        padding: 15px;
+        width: 95%;
+    }
+
+    h2 {
+        font-size: 18px;
+    }
+
+    input, button {
+        font-size: 14px;
+        padding: 10px;
+    }
+
+    #result {
+        max-height: 250px;
+    }
+}
+    </style>
+</head>
+
+<body>
+
+<div class="box">
+    <h2>AI Resume Analyzer</h2>
+
+    <form id="form">
+        <input type="file" name="resume" required>
+        <input type="text" name="job" placeholder="Enter job description">
+        <button type="submit">Analyze</button>
+    </form>
+
+    <div id="result"></div>
+</div>
+
+<script>
+document.getElementById('form').onsubmit = async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.target);
+
+    const res = await fetch('http://127.0.0.1:5000/analyze', {
+        method: 'POST',
+        body: formData
+    });
+
+    const data = await res.json();
+
+    const resultDiv = document.getElementById('result');
+    resultDiv.innerHTML = "";
+
+    // ✅ Show overall score
+    resultDiv.innerHTML += `
+        <h2 style="color:#38bdf8">
+            Overall Score: ${data.overall_score.toFixed(2)}
+        </h2>
+    `;
+
+    // ✅ Show each requirement analysis
+    data.details.forEach(item => {
+        let color = "#22c55e"; // green
+
+        if (item.match === "Moderate Match") color = "#facc15"; // yellow
+        if (item.match === "Weak Match") color = "#ef4444"; // red
+
+        resultDiv.innerHTML += `
+            <div class="result-card">
+                <p><b>Requirement:</b> ${item.requirement}</p>
+                <p><b>Match:</b> 
+                    <span style="color:${color}">${item.match}</span>
+                </p>
+                <p><b>Score:</b> ${item.score.toFixed(2)}</p>
+            </div>
+        `;
+    });
+};
+</script>
+
+</body>
+</html>
