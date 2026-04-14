@@ -3,7 +3,7 @@ from flask_cors import CORS
 import os
 import threading
 
-from resume_parser import extract_text
+from backend.resume_parser import extract_text
 from analyzer import analyze_resume, get_model
 
 # Initialize app
