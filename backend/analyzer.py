@@ -1,24 +1,29 @@
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
-from sentence_transformers import SentenceTransformer
-
 model = None
 
+# ✅ Lazy loading model
 def get_model():
     global model
     if model is None:
-        print("Loading model...")
+        print("Loading AI model...")
         model = SentenceTransformer('all-MiniLM-L6-v2')
     return model
+
 
 def analyze_resume(resume_text, job_description):
 
     resume_sentences = [s.strip() for s in resume_text.split('.') if s.strip()]
     job_sentences = [s.strip() for s in job_description.split('.') if s.strip()]
 
-    resume_embeddings = get_model().encode(resume_sentences)
-    job_embeddings = get_model().encode(job_sentences)
+    if not resume_sentences or not job_sentences:
+        return {"details": [], "overall_score": 0}
+
+    model = get_model()
+
+    resume_embeddings = model.encode(resume_sentences)
+    job_embeddings = model.encode(job_sentences)
 
     analysis = []
 
@@ -39,7 +44,7 @@ def analyze_resume(resume_text, job_description):
             "match": level
         })
 
-    avg_score = sum([item["score"] for item in analysis]) / len(analysis)
+    avg_score = sum(item["score"] for item in analysis) / len(analysis)
 
     return {
         "details": analysis,
